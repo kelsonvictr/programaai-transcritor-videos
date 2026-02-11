@@ -47,6 +47,25 @@ Para cada aula, o sistema gera um pacote NotebookLM com:
 - **whisper.cpp** → `brew install whisper-cpp`
 - **Modelo GGML** → O script `./go.sh` pode baixar automaticamente
 
+### 📥 Modelos Alternativos (Mais Rápidos)
+
+Para vídeos longos, você pode baixar modelos menores:
+
+```bash
+# Modelo Small (bom equilíbrio velocidade/qualidade)
+curl -L "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin" \
+  -o ggml-small.bin
+
+# Modelo Base (mais rápido, qualidade OK)
+curl -L "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin" \
+  -o ggml-base.bin
+```
+
+Depois edite `config.py`:
+```python
+WHISPER_MODEL_PATH = "./ggml-small.bin"  # ou ggml-base.bin
+```
+
 ## 📖 Documentação
 
 - **`QUICK_START.md`** → Guia visual rápido
@@ -55,10 +74,20 @@ Para cada aula, o sistema gera um pacote NotebookLM com:
 
 ### 💡 Dicas de Configuração
 
-- **VAD (Voice Activity Detection)**: Recomendado **ativado** para aulas longas (remove silêncios e melhora timestamps)
-- **Modelo**: Use `medium` (padrão) para melhor qualidade. Use `small` para testes rápidos.
+- **VAD (Voice Activity Detection)**: Checkbox disponível mas requer modelo separado. **Deixe desmarcado** por padrão (whisper já detecta voz).
+- **Modelo**: Use `medium` (padrão) para melhor qualidade. Use `small` ou `base` para vídeos longos (mais rápido).
 - **Limpeza de texto**: Mantém o conteúdo técnico, remove apenas muletas repetitivas
 - **Timestamps no TXT**: Facilita navegação no NotebookLM
+
+### ⏱️ Tempo de Processamento (CPU-only)
+
+| Duração Vídeo | Modelo Medium | Modelo Small | Modelo Base |
+|---------------|---------------|--------------|-------------|
+| 10 min        | ~5-10 min     | ~2-5 min     | ~1-3 min    |
+| 1 hora        | ~30-60 min    | ~15-30 min   | ~5-15 min   |
+| 2 horas       | ~1-2 horas    | ~30-60 min   | ~15-30 min  |
+
+**💡 Dica**: Para vídeos longos (>1h), considere usar o modelo `small` para ganhar velocidade mantendo boa qualidade.
 
 ---
 

@@ -848,6 +848,8 @@ def _transcribe(wav_path, model_path, language, use_vad, output_dir, log_path):
         "-f", wav_path,
         "-l", language,
         "-osrt", "-ovtt", "-otxt",
+        "-t", "8",  # Usar 8 threads para paralelizar
+        "-p", "1",  # Processar 1 vez (sem repetições)
     ]
     
     # Desabilitar GPU se configurado (evita crash do Metal no Apple Silicon)
@@ -858,16 +860,35 @@ def _transcribe(wav_path, model_path, language, use_vad, output_dir, log_path):
     # Se use_vad=True no futuro, adicionar: --vad-model <path>
 
     _log(log_path, f"CMD: {' '.join(cmd)}")
-    result = subprocess.run(
-        cmd, capture_output=True, text=True,
+    _log(log_path, "⏳ Processando... (pode levar vários minutos)")
+    _log(log_path, "💡 Dica: Para vídeos longos, considere usar o modelo 'small' ou 'base'")
+    
+    # Executar com output em tempo real
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
         cwd=output_dir,
-        timeout=7200  # 2h max
+        bufsize=1,
+        universal_newlines=True
     )
-    _log(log_path, f"whisper stdout:\n{result.stdout[-1000:]}")
-    if result.stderr:
-        _log(log_path, f"whisper stderr:\n{result.stderr[-1000:]}")
-    if result.returncode != 0:
-        raise RuntimeError(f"whisper-cli falhou (code {result.returncode}): {result.stderr[-300:]}")
+    
+    # Capturar e logar output em tempo real
+    output_lines = []
+    for line in process.stdout:
+        output_lines.append(line)
+        # Logar progresso a cada 50 linhas
+        if len(output_lines) % 50 == 0:
+            _log(log_path, f"[whisper] Processando... ({len(output_lines)} linhas)")
+    
+    process.wait(timeout=7200)  # 2h max
+    
+    full_output = ''.join(output_lines)
+    _log(log_path, f"whisper output (últimas linhas):\n{full_output[-1000:]}")
+    
+    if process.returncode != 0:
+        raise RuntimeError(f"whisper-cli falhou (code {process.returncode}): {full_output[-500:]}")
 
 
 def _standardize_whisper_outputs(output_dir, log_path):

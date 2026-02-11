@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% block title %}{{ rec.title }} — Transcritor NotebookLM PRO{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h2 class="mb-1">
+            {% if rec.status == 'CONCLUÍDA' %}<i class="bi bi-check-circle text-success"></i>
+            {% elif rec.status == 'PROCESSANDO' %}<i class="bi bi-gear-wide-connected text-info spin"></i>
+            {% elif rec.status == 'ERRO' %}<i class="bi bi-x-circle text-danger"></i>
+            {% else %}<i class="bi bi-clock text-warning"></i>
+            {% endif %}
+            {{ rec.title }}
+        </h2>
+        <p class="text-muted mb-0">
+            <small>
+                <i class="bi bi-file-earmark"></i> {{ rec.original_filename }}
+                &middot; #{{ rec.id }}
+                &middot; {{ rec.created_at[:16] }}
+                {% if rec.duration_fmt != 'N/A' %}&middot; <i class="bi bi-clock"></i> {{ rec.duration_fmt }}{% endif %}
+            </small>
+        </p>
+        {% if rec.tags %}
+        <p class="mt-1">
+            {% for key, val in rec.tags.items() %}
+            <span class="badge bg-secondary">{{ key }}: {{ val }}</span>
+            {% endfor %}
+        </p>
+        {% endif %}
+    </div>
+    <div class="btn-group">
+        {% if rec.status == 'CONCLUÍDA' %}
+        <a href="{{ url_for('download_file', tid=rec.id, filekey='zip') }}" class="btn btn-success">
+            <i class="bi bi-file-zip"></i> Download ZIP
+        </a>
+        <form method="POST" action="{{ url_for('open_folder', tid=rec.id) }}" class="d-inline">
+            <button type="submit" class="btn btn-outline-secondary">
+                <i class="bi bi-folder2-open"></i> Abrir Pasta
+            </button>
+        </form>
+        {% endif %}
+        <form method="POST" action="{{ url_for('delete', tid=rec.id) }}" class="d-inline"
+              onsubmit="return confirm('Deletar esta transcrição?')">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-trash"></i> Deletar
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Status / Progresso -->
+<div class="card mb-4" id="statusCard">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <strong>Status:</strong>
+                <span id="statusBadge">
+                    {% if rec.status == 'PENDENTE' %}
+                    <span class="badge bg-warning text-dark">Pendente</span>
+                    {% elif rec.status == 'PROCESSANDO' %}
+                    <span class="badge bg-info">Processando — {{ rec.stage }}</span>
+                    {% elif rec.status == 'CONCLUÍDA' %}
+                    <span class="badge bg-success">Concluída</span>
+                    {% elif rec.status == 'ERRO' %}
+                    <span class="badge bg-danger">Erro</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="col-md-7">
+                <div class="progress" style="height: 20px;">
+                    <div class="progress-bar progress-bar-striped {% if rec.status == 'PROCESSANDO' %}progress-bar-animated{% endif %} {% if rec.status == 'ERRO' %}bg-danger{% elif rec.status == 'CONCLUÍDA' %}bg-success{% endif %}"
+                         id="progressBar" style="width: {{ rec.percent }}%">
+                        <span id="progressText">{{ rec.percent }}%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 text-end">
+                <strong>Modelo:</strong> {{ rec.model_name }}
+                {% if rec.use_vad %}<br><small class="text-muted">VAD: ON</small>{% endif %}
+            </div>
+        </div>
+        {% if rec.error_message %}
+        <div class="alert alert-danger mt-3 mb-0">
+            <strong>Erro:</strong> {{ rec.error_message }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Log -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-terminal"></i> Log de Processamento</span>
+        {% if rec.log_path %}
+        <a href="{{ url_for('download_file', tid=rec.id, filekey='log') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-download"></i> Log completo
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        <pre class="log-viewer" id="logViewer">{{ log_tail }}</pre>
+    </div>
+</div>
+
+{% if rec.status == 'CONCLUÍDA' %}
+
+<!-- Downloads Rápidos -->
+<div class="card mb-4">
+    <div class="card-header bg-success text-white">
+        <i class="bi bi-download"></i> Downloads do Pacote NotebookLM
+    </div>
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <h6 class="text-muted mb-2">📝 Transcrição</h6>
+                <div class="d-grid gap-1">
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='txt') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-file-text"></i> transcript.txt
+                    </a>
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='srt') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-badge-cc"></i> transcript.srt
+                    </a>
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='vtt') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-badge-cc"></i> transcript.vtt
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-muted mb-2">📚 Notas &amp; Capítulos</h6>
+                <div class="d-grid gap-1">
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='notes_short') }}" class="btn btn-sm btn-outline-info">
+                        <i class="bi bi-file-earmark-text"></i> notes_short.md
+                    </a>
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='notes_medium') }}" class="btn btn-sm btn-outline-info">
+                        <i class="bi bi-file-earmark-text"></i> notes_medium.md
+                    </a>
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='notes_detailed') }}" class="btn btn-sm btn-outline-info">
+                        <i class="bi bi-file-earmark-text"></i> notes_detailed.md
+                    </a>
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='chapters_md') }}" class="btn btn-sm btn-outline-info">
+                        <i class="bi bi-list-ol"></i> chapters.md
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-muted mb-2">🎬 Reels &amp; Prompts</h6>
+                <div class="d-grid gap-1">
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='reels_md') }}" class="btn btn-sm btn-outline-warning">
+                        <i class="bi bi-camera-reels"></i> reels_cuts.md
+                    </a>
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='reels_json') }}" class="btn btn-sm btn-outline-warning">
+                        <i class="bi bi-filetype-json"></i> reels.json
+                    </a>
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='prompts') }}" class="btn btn-sm btn-outline-dark">
+                        <i class="bi bi-chat-quote"></i> prompts.txt
+                    </a>
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-filetype-json"></i> index.json
+                    </a>
+                    <a href="{{ url_for('download_file', tid=rec.id, filekey='readme') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-file-earmark-richtext"></i> README.md
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview: Transcrição -->
+{% if txt_preview %}
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-file-text"></i> Preview — Transcrição (primeiros 2000 chars)
+    </div>
+    <div class="card-body">
+        <pre class="preview-text">{{ txt_preview }}</pre>
+    </div>
+</div>
+{% endif %}
+
+<!-- Preview: Capítulos -->
+{% if chapters_preview %}
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-list-ol"></i> Capítulos Detectados
+    </div>
+    <div class="card-body">
+        <pre class="preview-text">{{ chapters_preview }}</pre>
+    </div>
+</div>
+{% endif %}
+
+<!-- Preview: Notas -->
+{% if notes_previews %}
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-journal-text"></i> Notas da Aula
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs" id="notesTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="short-tab" data-bs-toggle="tab"
+                        data-bs-target="#short" type="button">📝 Resumo</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="medium-tab" data-bs-toggle="tab"
+                        data-bs-target="#medium" type="button">📖 Completa</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="detailed-tab" data-bs-toggle="tab"
+                        data-bs-target="#detailed" type="button">📚 Apostila</button>
+            </li>
+        </ul>
+        <div class="tab-content pt-3" id="notesTabContent">
+            <div class="tab-pane fade show active" id="short" role="tabpanel">
+                <pre class="preview-text">{{ notes_previews.get('notes_short_path', 'Não disponível') }}</pre>
+            </div>
+            <div class="tab-pane fade" id="medium" role="tabpanel">
+                <pre class="preview-text">{{ notes_previews.get('notes_medium_path', 'Não disponível') }}</pre>
+            </div>
+            <div class="tab-pane fade" id="detailed" role="tabpanel">
+                <pre class="preview-text">{{ notes_previews.get('notes_detailed_path', 'Não disponível') }}</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Preview: Reels -->
+{% if reels_preview %}
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-camera-reels"></i> Cortes para Reels
+    </div>
+    <div class="card-body">
+        <pre class="preview-text">{{ reels_preview }}</pre>
+    </div>
+</div>
+{% endif %}
+
+<!-- Preview: Prompts (com botões de copiar) -->
+{% if prompts_preview %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-chat-quote"></i> Prompts para NotebookLM</span>
+        <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard(document.getElementById('promptsText').innerText)">
+            <i class="bi bi-clipboard"></i> Copiar Todos
+        </button>
+    </div>
+    <div class="card-body">
+        <div id="promptsContainer">
+            {% set prompts_list = prompts_preview.split('=' * 60) %}
+            {% for block in prompts_list %}
+            {% if block.strip() and 'PROMPT' in block %}
+            <div class="prompt-block mb-3 p-3 bg-light rounded position-relative">
+                <button class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2 copy-btn"
+                        onclick="copyToClipboard(this.closest('.prompt-block').querySelector('.prompt-content').innerText)">
+                    <i class="bi bi-clipboard"></i>
+                </button>
+                <pre class="prompt-content mb-0" style="white-space: pre-wrap;">{{ block.strip() }}</pre>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <pre class="d-none" id="promptsText">{{ prompts_preview }}</pre>
+    </div>
+</div>
+{% endif %}
+
+{% endif %} {# fim CONCLUÍDA #}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+{% if rec.status in ['PENDENTE', 'PROCESSANDO'] %}
+// Polling de status
+const TID = {{ rec.id }};
+let pollInterval = setInterval(pollStatus, 2500);
+
+function pollStatus() {
+    fetch(`/api/t/${TID}/status`)
+        .then(r => r.json())
+        .then(data => {
+            // Atualizar barra de progresso
+            const bar = document.getElementById('progressBar');
+            const text = document.getElementById('progressText');
+            bar.style.width = data.percent + '%';
+            text.textContent = data.percent + '%';
+
+            // Atualizar badge de status
+            const badge = document.getElementById('statusBadge');
+            if (data.status === 'PROCESSANDO') {
+                badge.innerHTML = `<span class="badge bg-info">Processando — ${data.stage}</span>`;
+            } else if (data.status === 'CONCLUÍDA') {
+                badge.innerHTML = '<span class="badge bg-success">Concluída</span>';
+                bar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                bar.classList.add('bg-success');
+                clearInterval(pollInterval);
+                // Recarregar para mostrar previews
+                setTimeout(() => location.reload(), 1000);
+            } else if (data.status === 'ERRO') {
+                badge.innerHTML = '<span class="badge bg-danger">Erro</span>';
+                bar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                bar.classList.add('bg-danger');
+                clearInterval(pollInterval);
+                setTimeout(() => location.reload(), 1000);
+            }
+
+            // Atualizar log
+            const logViewer = document.getElementById('logViewer');
+            if (data.last_log_lines && data.last_log_lines.length > 0) {
+                logViewer.textContent = data.last_log_lines.join('\n');
+                logViewer.scrollTop = logViewer.scrollHeight;
+            }
+        })
+        .catch(err => console.error('Polling error:', err));
+}
+{% endif %}
+</script>
+{% endblock %}

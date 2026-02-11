@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Transcritor NotebookLM PRO{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-collection-play"></i> Dashboard</h2>
+    <a href="{{ url_for('new_form') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nova Transcrição
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small text-muted">Buscar</label>
+                <input type="text" class="form-control form-control-sm" name="q"
+                       value="{{ search }}" placeholder="Título ou arquivo…">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted">Status</label>
+                <select class="form-select form-select-sm" name="status">
+                    <option value="">Todos</option>
+                    <option value="PENDENTE" {{ 'selected' if status_filter == 'PENDENTE' }}>Pendente</option>
+                    <option value="PROCESSANDO" {{ 'selected' if status_filter == 'PROCESSANDO' }}>Processando</option>
+                    <option value="CONCLUÍDA" {{ 'selected' if status_filter == 'CONCLUÍDA' }}>Concluída</option>
+                    <option value="ERRO" {{ 'selected' if status_filter == 'ERRO' }}>Erro</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted">Tag (curso/turma/módulo)</label>
+                <input type="text" class="form-control form-control-sm" name="tag"
+                       value="{{ tag_filter }}" placeholder="Ex: Python, Turma A…">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-outline-primary w-100">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-md-2">
+                <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-secondary w-100">
+                    <i class="bi bi-x-circle"></i> Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista -->
+{% if items %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Título</th>
+                <th>Tags</th>
+                <th>Status</th>
+                <th>Progresso</th>
+                <th>Duração</th>
+                <th>Data</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+        <tr class="{% if item.status == 'ERRO' %}table-danger{% elif item.status == 'PROCESSANDO' %}table-info{% elif item.status == 'CONCLUÍDA' %}table-success{% endif %}">
+            <td><strong>{{ item.id }}</strong></td>
+            <td>
+                <a href="{{ url_for('detail', tid=item.id) }}" class="text-decoration-none fw-semibold">
+                    {{ item.title[:50] }}{% if item.title|length > 50 %}…{% endif %}
+                </a>
+                <br>
+                <small class="text-muted">{{ item.original_filename }}</small>
+            </td>
+            <td>
+                {% for key, val in item.tags.items() %}
+                <span class="badge bg-secondary">{{ key }}: {{ val }}</span>
+                {% endfor %}
+            </td>
+            <td>
+                {% if item.status == 'PENDENTE' %}
+                <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pendente</span>
+                {% elif item.status == 'PROCESSANDO' %}
+                <span class="badge bg-info"><i class="bi bi-gear-wide-connected spin"></i> {{ item.stage }}</span>
+                {% elif item.status == 'CONCLUÍDA' %}
+                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Concluída</span>
+                {% elif item.status == 'ERRO' %}
+                <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Erro</span>
+                {% endif %}
+            </td>
+            <td>
+                <div class="progress" style="height: 6px; width: 80px;">
+                    <div class="progress-bar {% if item.status == 'ERRO' %}bg-danger{% elif item.status == 'CONCLUÍDA' %}bg-success{% endif %}"
+                         style="width: {{ item.percent }}%"></div>
+                </div>
+                <small class="text-muted">{{ item.percent }}%</small>
+            </td>
+            <td>
+                {% if item.duration_seconds %}
+                    {% set dur = item.duration_seconds|int %}
+                    {{ "%02d:%02d:%02d"|format(dur // 3600, (dur % 3600) // 60, dur % 60) }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+            <td><small>{{ item.created_at[:16] }}</small></td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('detail', tid=item.id) }}" class="btn btn-outline-primary" title="Detalhes">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    {% if item.status == 'CONCLUÍDA' %}
+                    <a href="{{ url_for('download_file', tid=item.id, filekey='zip') }}" class="btn btn-outline-success" title="Download ZIP">
+                        <i class="bi bi-file-zip"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('open_folder', tid=item.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-outline-secondary" title="Abrir pasta">
+                            <i class="bi bi-folder2-open"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('delete', tid=item.id) }}" class="d-inline"
+                          onsubmit="return confirm('Deletar transcrição #{{ item.id }}?')">
+                        <button type="submit" class="btn btn-outline-danger" title="Deletar">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+    <p class="mt-3">Nenhuma transcrição encontrada.</p>
+    <a href="{{ url_for('new_form') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Criar Primeira Transcrição
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

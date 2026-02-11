@@ -1,0 +1,189 @@
+/* ══════════════════════════════════════════════════════════
+   Transcritor → NotebookLM PRO — Estilos
+   ══════════════════════════════════════════════════════════ */
+
+/* Body */
+body {
+    background-color: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%) !important;
+}
+
+.navbar-brand img {
+    transition: transform 0.2s;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.1);
+}
+
+/* Cards */
+.card {
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+/* Log viewer */
+.log-viewer {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 16px;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    border-radius: 0 0 10px 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Preview text */
+.preview-text {
+    background: #fafafa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Progress */
+.progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+/* Spin animation para ícone de processamento */
+.spin {
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Tabela */
+.table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Prompt blocks */
+.prompt-block {
+    transition: box-shadow 0.2s;
+}
+
+.prompt-block:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.prompt-content {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+}
+
+/* Copy button feedback */
+.copy-btn.copied {
+    color: #198754 !important;
+    border-color: #198754 !important;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Footer */
+footer {
+    font-size: 0.8rem;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+    }
+}
+
+/* Toast para copiar */
+.copy-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 10px 20px;
+    background: #198754;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-size: 0.9rem;
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* File upload area */
+#file {
+    border: 2px dashed #dee2e6;
+    padding: 20px;
+    border-radius: 10px;
+    transition: border-color 0.2s;
+}
+
+#file:hover {
+    border-color: #1a73e8;
+}
+
+/* Switch customizado */
+.form-check-input:checked {
+    background-color: #1a73e8;
+    border-color: #1a73e8;
+}

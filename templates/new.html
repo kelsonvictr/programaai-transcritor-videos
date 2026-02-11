@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}Nova Transcrição — Transcritor NotebookLM PRO{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-4"><i class="bi bi-plus-circle"></i> Nova Transcrição</h2>
+
+        <form method="POST" action="{{ url_for('new_submit') }}" enctype="multipart/form-data" id="newForm">
+            <!-- Upload -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-upload"></i> Arquivo de Vídeo/Áudio
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Selecione o arquivo da aula</label>
+                        <input type="file" class="form-control" id="file" name="file" required
+                               accept=".mov,.mp4,.m4a,.mp3,.wav,.mkv,.webm">
+                        <div class="form-text">
+                            Formatos aceitos: .mov, .mp4, .m4a, .mp3, .wav, .mkv, .webm
+                        </div>
+                    </div>
+                    <div id="fileInfo" class="text-muted small d-none"></div>
+                </div>
+            </div>
+
+            <!-- Metadados -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-tag"></i> Metadados da Aula
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Título da Aula</label>
+                        <input type="text" class="form-control" id="title" name="title"
+                               placeholder="Ex: Aula 05 — Estruturas de Dados">
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="curso" class="form-label">Curso</label>
+                            <input type="text" class="form-control" id="curso" name="curso"
+                                   placeholder="Ex: Python Básico">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="turma" class="form-label">Turma</label>
+                            <input type="text" class="form-control" id="turma" name="turma"
+                                   placeholder="Ex: Turma 2025-A">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="modulo" class="form-label">Módulo</label>
+                            <input type="text" class="form-control" id="modulo" name="modulo"
+                                   placeholder="Ex: Módulo 3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-gear"></i> Configurações de Processamento
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="language" class="form-label">Idioma</label>
+                            <select class="form-select" id="language" name="language">
+                                <option value="pt" selected>Português (pt)</option>
+                                <option value="en">Inglês (en)</option>
+                                <option value="es">Espanhol (es)</option>
+                                <option value="fr">Francês (fr)</option>
+                                <option value="auto">Auto-detectar</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="model_name" class="form-label">Modelo</label>
+                            <select class="form-select" id="model_name" name="model_name">
+                                <option value="medium" selected>Medium (recomendado)</option>
+                                <option value="large">Large</option>
+                                <option value="small">Small</option>
+                                <option value="base">Base</option>
+                                <option value="tiny">Tiny</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h6 class="text-muted mb-3">Opções de Processamento</h6>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="use_vad" name="use_vad" checked>
+                                <label class="form-check-label" for="use_vad">
+                                    Usar VAD <small class="text-muted">(recomendado para aulas longas)</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="clean_text" name="clean_text" checked>
+                                <label class="form-check-label" for="clean_text">
+                                    Limpeza leve do texto <small class="text-muted">(remover muletas)</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="add_timestamps" name="add_timestamps" checked>
+                                <label class="form-check-label" for="add_timestamps">
+                                    Inserir timestamps no TXT
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="gen_notes" name="gen_notes" checked>
+                                <label class="form-check-label" for="gen_notes">
+                                    Gerar Notes.md <small class="text-muted">(3 versões)</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="gen_chapters" name="gen_chapters" checked>
+                                <label class="form-check-label" for="gen_chapters">
+                                    Gerar capítulos/tópicos
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="gen_reels" name="gen_reels" checked>
+                                <label class="form-check-label" for="gen_reels">
+                                    Gerar cortes para Reels
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                    <i class="bi bi-play-circle"></i> Iniciar Transcrição
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const info = document.getElementById('fileInfo');
+    if (file) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        info.innerHTML = `<i class="bi bi-file-earmark-play"></i> ${file.name} — ${sizeMB} MB`;
+        info.classList.remove('d-none');
+
+        // Auto-preencher título se vazio
+        const titleInput = document.getElementById('title');
+        if (!titleInput.value) {
+            const name = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
+            titleInput.value = name;
+        }
+    } else {
+        info.classList.add('d-none');
+    }
+});
+
+document.getElementById('newForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando…';
+});
+</script>
+{% endblock %}

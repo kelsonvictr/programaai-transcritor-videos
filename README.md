@@ -9,8 +9,11 @@ Ferramenta **100% local** (macOS) para transcrever aulas gravadas e gerar um pac
 ## ⚡ Início Rápido
 
 ```bash
-# Jeito mais fácil (all-in-one)
+# 1. Setup + Run (all-in-one)
 ./go.sh
+
+# 2. Baixar modelo SMALL (recomendado para aulas >1h)
+./download_small_model.sh
 ```
 
 Pronto! Acesse **http://127.0.0.1:5000**
@@ -22,6 +25,7 @@ Para mais detalhes, veja `QUICK_START.md` ou execute `./help.sh`.
 | Script | Descrição |
 |--------|-----------|
 | `./go.sh` | 🚀 Setup + Run em 1 comando (recomendado) |
+| `./download_small_model.sh` | 📥 Baixar modelo small (4x mais rápido) |
 | `./start.sh` | ⚙️ Setup inicial (pergunta se quer iniciar) |
 | `./run.sh` | ▶️ Iniciar servidor Flask |
 | `./clean.sh` | 🧹 Limpar dados e recomeçar |
@@ -49,10 +53,17 @@ Para cada aula, o sistema gera um pacote NotebookLM com:
 
 ### 📥 Modelos Alternativos (Mais Rápidos)
 
-Para vídeos longos, você pode baixar modelos menores:
+**⚡ RECOMENDADO para aulas longas (>1h):**
 
 ```bash
-# Modelo Small (bom equilíbrio velocidade/qualidade)
+# Use o script automático (mais fácil)
+./download_small_model.sh
+```
+
+Ou baixe manualmente:
+
+```bash
+# Modelo Small (bom equilíbrio velocidade/qualidade) - RECOMENDADO
 curl -L "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin" \
   -o ggml-small.bin
 
@@ -61,10 +72,9 @@ curl -L "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
   -o ggml-base.bin
 ```
 
-Depois edite `config.py`:
-```python
-WHISPER_MODEL_PATH = "./ggml-small.bin"  # ou ggml-base.bin
-```
+**O sistema detecta automaticamente:**
+- Se existir `ggml-small.bin` → usa small (prioridade)
+- Senão, usa `ggml-medium.bin` (fallback)
 
 ## 📖 Documentação
 

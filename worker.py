@@ -673,7 +673,7 @@ def _run_pipeline(tid: int):
     output_dir = rec["output_dir"]
     input_path = rec["input_path"]
     log_path = os.path.join(output_dir, "logs.txt")
-    model_path = rec["model_path"] or config.MODEL_PATH
+    model_path = rec["model_path"] or config.WHISPER_MODEL_PATH
     language = rec["language"] or config.DEFAULT_LANGUAGE
     use_vad = bool(rec["use_vad"])
     clean = bool(rec["clean_text"])
@@ -842,13 +842,17 @@ def _extract_audio(input_path, wav_path, log_path):
 
 
 def _transcribe(wav_path, model_path, language, use_vad, output_dir, log_path):
+    # Detectar número de cores disponíveis
+    import multiprocessing
+    n_threads = multiprocessing.cpu_count()
+    
     cmd = [
         config.WHISPER_BIN,
         "-m", model_path,
         "-f", wav_path,
         "-l", language,
         "-osrt", "-ovtt", "-otxt",
-        "-t", "8",  # Usar 8 threads para paralelizar
+        "-t", str(n_threads),  # Usar TODOS os threads disponíveis
         "-p", "1",  # Processar 1 vez (sem repetições)
     ]
     
@@ -860,8 +864,9 @@ def _transcribe(wav_path, model_path, language, use_vad, output_dir, log_path):
     # Se use_vad=True no futuro, adicionar: --vad-model <path>
 
     _log(log_path, f"CMD: {' '.join(cmd)}")
+    _log(log_path, f"🚀 Usando {n_threads} threads para máxima performance")
+    _log(log_path, f"� Modelo: {os.path.basename(model_path)}")
     _log(log_path, "⏳ Processando... (pode levar vários minutos)")
-    _log(log_path, "💡 Dica: Para vídeos longos, considere usar o modelo 'small' ou 'base'")
     _log(log_path, "")
     _log(log_path, "═" * 60)
     _log(log_path, "WHISPER OUTPUT EM TEMPO REAL:")

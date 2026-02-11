@@ -11,7 +11,13 @@ FFMPEG_BIN = os.environ.get("FFMPEG_BIN", "ffmpeg")
 FFPROBE_BIN = os.environ.get("FFPROBE_BIN", "ffprobe")
 
 # ── Modelo GGML ──────────────────────────────────────────
-MODEL_PATH = os.environ.get("MODEL_PATH", os.path.join(BASE_DIR, "ggml-medium.bin"))
+# Para aulas longas (>1h), use ggml-small.bin (4x mais rápido)
+# Medium: melhor qualidade, mais lento | Small: bom equilíbrio | Base: mais rápido
+WHISPER_MODEL_PATH = os.environ.get("WHISPER_MODEL_PATH", os.path.join(BASE_DIR, "ggml-small.bin"))
+
+# Se não encontrar small, fallback para medium
+if not os.path.exists(WHISPER_MODEL_PATH):
+    WHISPER_MODEL_PATH = os.path.join(BASE_DIR, "ggml-medium.bin")
 
 # ── Idioma padrão ────────────────────────────────────────
 DEFAULT_LANGUAGE = "pt"

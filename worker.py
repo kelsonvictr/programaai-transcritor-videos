@@ -854,8 +854,8 @@ def _transcribe(wav_path, model_path, language, use_vad, output_dir, log_path):
     if not config.WHISPER_USE_GPU:
         cmd.append("--no-gpu")
     
-    if use_vad:
-        cmd.append("--vad")
+    # Nota: VAD requer modelo separado, whisper já faz detecção de voz internamente
+    # Se use_vad=True no futuro, adicionar: --vad-model <path>
 
     _log(log_path, f"CMD: {' '.join(cmd)}")
     result = subprocess.run(

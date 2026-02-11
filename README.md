@@ -151,6 +151,9 @@ python app.py
 ```
 A transcrição será mais lenta, mas estável.
 
+### Erro de VAD Model
+O checkbox "Usar VAD" está disponível na interface, mas o modelo VAD não está configurado por padrão. O whisper.cpp já faz detecção de voz internamente, então você pode desmarcar essa opção. Para usar VAD no futuro, será necessário baixar o modelo VAD separadamente.
+
 ## 📂 Estrutura do Projeto
 
 ```

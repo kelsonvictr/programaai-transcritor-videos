@@ -35,5 +35,9 @@ DEFAULT_REELS_CUT_COUNT = 12           # cortes sugeridos para Reels
 # VAD ajuda a remover silêncios e melhorar timestamps em aulas longas
 # Recomendado: deixar ativado por padrão (checkbox na UI)
 
+# ── Whisper GPU/CPU ──────────────────────────────────────
+# Se houver crash com Metal/GPU no Apple Silicon, mude para False
+WHISPER_USE_GPU = os.environ.get("WHISPER_USE_GPU", "false").lower() == "true"
+
 # ── Flask ────────────────────────────────────────────────
 SECRET_KEY = os.environ.get("SECRET_KEY", "transcritor-local-dev-key-2025")

@@ -138,6 +138,19 @@ source ~/.zshrc
 - Ative o VAD para pular silêncios
 - Verifique modo de economia de energia do Mac
 
+### Crash com Metal/GPU (Apple Silicon)
+Se o whisper-cli crashar com erro de Metal:
+```bash
+# Desabilite a GPU editando config.py:
+WHISPER_USE_GPU = False
+```
+Ou defina a variável de ambiente:
+```bash
+export WHISPER_USE_GPU=false
+python app.py
+```
+A transcrição será mais lenta, mas estável.
+
 ## 📂 Estrutura do Projeto
 
 ```

@@ -849,6 +849,11 @@ def _transcribe(wav_path, model_path, language, use_vad, output_dir, log_path):
         "-l", language,
         "-osrt", "-ovtt", "-otxt",
     ]
+    
+    # Desabilitar GPU se configurado (evita crash do Metal no Apple Silicon)
+    if not config.WHISPER_USE_GPU:
+        cmd.append("--no-gpu")
+    
     if use_vad:
         cmd.append("--vad")
 

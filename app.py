@@ -61,8 +61,8 @@ def _check_dependencies():
         issues.append(f"ffprobe não encontrado: {config.FFPROBE_BIN}")
 
     # modelo
-    if not os.path.isfile(config.MODEL_PATH):
-        issues.append(f"Modelo GGML não encontrado em: {config.MODEL_PATH}")
+    if not os.path.isfile(config.WHISPER_MODEL_PATH):
+        issues.append(f"Modelo GGML não encontrado em: {config.WHISPER_MODEL_PATH}")
 
     return issues
 
@@ -179,7 +179,7 @@ def new_submit():
         "gen_chapters": 1 if gen_chapters else 0,
         "gen_reels": 1 if gen_reels else 0,
         "model_name": model_name,
-        "model_path": config.MODEL_PATH,
+        "model_path": config.WHISPER_MODEL_PATH,
     })
 
     # Definir output_dir com ID
@@ -416,7 +416,7 @@ if __name__ == "__main__":
         print("\n✅ Todas as dependências encontradas!\n")
 
     print(f"  📁 Data: {config.DATA_DIR}")
-    print(f"  🤖 Modelo: {config.MODEL_PATH}")
+    print(f"  🤖 Modelo: {config.WHISPER_MODEL_PATH}")
     print(f"  🔊 Whisper: {config.WHISPER_BIN}")
     print(f"  🎬 FFmpeg: {config.FFMPEG_BIN}")
     print()

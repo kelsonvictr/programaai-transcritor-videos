@@ -862,6 +862,10 @@ def _transcribe(wav_path, model_path, language, use_vad, output_dir, log_path):
     _log(log_path, f"CMD: {' '.join(cmd)}")
     _log(log_path, "⏳ Processando... (pode levar vários minutos)")
     _log(log_path, "💡 Dica: Para vídeos longos, considere usar o modelo 'small' ou 'base'")
+    _log(log_path, "")
+    _log(log_path, "═" * 60)
+    _log(log_path, "WHISPER OUTPUT EM TEMPO REAL:")
+    _log(log_path, "═" * 60)
     
     # Executar com output em tempo real
     process = subprocess.Popen(
@@ -874,20 +878,30 @@ def _transcribe(wav_path, model_path, language, use_vad, output_dir, log_path):
         universal_newlines=True
     )
     
-    # Capturar e logar output em tempo real
+    # Capturar e logar output em tempo real (cada linha)
     output_lines = []
     for line in process.stdout:
-        output_lines.append(line)
-        # Logar progresso a cada 50 linhas
-        if len(output_lines) % 50 == 0:
-            _log(log_path, f"[whisper] Processando... ({len(output_lines)} linhas)")
+        line = line.rstrip()
+        if line:  # Apenas linhas não vazias
+            output_lines.append(line)
+            # Logar CADA linha importante do whisper
+            if any(keyword in line.lower() for keyword in ['whisper', 'progress', 'processing', 'encoder', 'decoder', '%', 'ms']):
+                _log(log_path, f"[whisper] {line}")
+            # Logar contador a cada 100 linhas
+            if len(output_lines) % 100 == 0:
+                _log(log_path, f"[info] {len(output_lines)} linhas processadas...")
     
     process.wait(timeout=7200)  # 2h max
     
-    full_output = ''.join(output_lines)
-    _log(log_path, f"whisper output (últimas linhas):\n{full_output[-1000:]}")
+    _log(log_path, "═" * 60)
+    _log(log_path, f"✅ Whisper concluído! Total: {len(output_lines)} linhas")
+    _log(log_path, "═" * 60)
+    
+    full_output = '\n'.join(output_lines)
     
     if process.returncode != 0:
+        _log(log_path, f"❌ ERRO: Whisper falhou com código {process.returncode}")
+        _log(log_path, f"Últimas linhas:\n{full_output[-500:]}")
         raise RuntimeError(f"whisper-cli falhou (code {process.returncode}): {full_output[-500:]}")
 
 

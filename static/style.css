@@ -2,35 +2,72 @@
    Transcritor → NotebookLM PRO — Estilos
    ══════════════════════════════════════════════════════════ */
 
-/* Body */
+/* Body - Fundo moderno */
 body {
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf4 100%);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
 }
 
-/* Navbar */
+/* Navbar - Design moderno e elegante */
 .navbar {
-    background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%) !important;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%) !important;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .navbar-brand img {
-    transition: transform 0.2s;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.2));
 }
 
 .navbar-brand:hover img {
-    transform: scale(1.1);
+    transform: scale(1.08) rotate(2deg);
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
 }
 
-/* Cards */
+/* Links da navbar */
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    padding: 8px 16px !important;
+    border-radius: 8px;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+/* Cards - Design elevado e moderno */
 .card {
     border: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    background: white;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
 }
 
 .card-header {
-    border-radius: 10px 10px 0 0 !important;
+    border-radius: 16px 16px 0 0 !important;
     font-weight: 600;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%) !important;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1) !important;
 }
 
 /* Log viewer */
@@ -64,15 +101,19 @@ body {
     word-break: break-word;
 }
 
-/* Progress */
+/* Progress - Design moderno */
 .progress {
-    border-radius: 10px;
-    background-color: #e9ecef;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #f1f3f5 0%, #e9ecef 100%);
+    height: 24px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .progress-bar {
-    border-radius: 10px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
     transition: width 0.5s ease;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 /* Spin animation para ícone de processamento */
@@ -111,9 +152,57 @@ body {
     font-size: 0.85rem;
 }
 
-/* Badges */
+/* Badges - Paleta moderna */
 .badge {
     font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.badge.bg-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+
+/* Botões - Design moderno */
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
 /* Copy button feedback */

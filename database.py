@@ -1,17 +1,14 @@
 """
-Módulo de banco de dados SQLite para o Transcritor.
+Módulo de banco de dados SQLite para o Transcritor — Versão Rápida.
 """
 import sqlite3
 import os
-import json
-from datetime import datetime
 from config import DB_PATH, DATA_DIR
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS transcriptions (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
     title               TEXT NOT NULL,
-    tags_json           TEXT DEFAULT '{}',
     original_filename   TEXT,
     input_path          TEXT,
     output_dir          TEXT,
@@ -23,28 +20,8 @@ CREATE TABLE IF NOT EXISTS transcriptions (
     stage               TEXT DEFAULT '',
     percent             INTEGER DEFAULT 0,
     language            TEXT DEFAULT 'pt',
-    use_vad             INTEGER DEFAULT 1,
-    clean_text          INTEGER DEFAULT 1,
-    add_timestamps      INTEGER DEFAULT 1,
-    gen_notes           INTEGER DEFAULT 1,
-    gen_chapters        INTEGER DEFAULT 1,
-    gen_reels           INTEGER DEFAULT 1,
-    model_name          TEXT DEFAULT 'medium',
     model_path          TEXT,
-    transcript_txt_path TEXT,
-    transcript_srt_path TEXT,
-    transcript_vtt_path TEXT,
-    chapters_md_path    TEXT,
-    chapters_json_path  TEXT,
-    notes_short_path    TEXT,
-    notes_medium_path   TEXT,
-    notes_detailed_path TEXT,
-    prompts_txt_path    TEXT,
-    reels_md_path       TEXT,
-    reels_json_path     TEXT,
-    index_json_path     TEXT,
-    readme_path         TEXT,
-    zip_path            TEXT,
+    transcript_txt      TEXT,
     log_path            TEXT,
     error_message       TEXT
 );
@@ -62,6 +39,11 @@ def get_db():
 def init_db():
     conn = get_db()
     conn.executescript(SCHEMA)
+    # Migrar tabela antiga se existir (adicionar coluna transcript_txt)
+    try:
+        conn.execute("ALTER TABLE transcriptions ADD COLUMN transcript_txt TEXT")
+    except sqlite3.OperationalError:
+        pass  # coluna já existe
     conn.close()
 
 
@@ -96,16 +78,10 @@ def get_transcription(tid: int):
     return dict(row) if row else None
 
 
-def list_transcriptions(status=None, tag=None, search=None):
+def list_transcriptions(search=None):
     conn = get_db()
     q = "SELECT * FROM transcriptions WHERE 1=1"
     params = []
-    if status:
-        q += " AND status = ?"
-        params.append(status)
-    if tag:
-        q += " AND tags_json LIKE ?"
-        params.append(f"%{tag}%")
     if search:
         q += " AND (title LIKE ? OR original_filename LIKE ?)"
         params.extend([f"%{search}%", f"%{search}%"])

@@ -1,5 +1,5 @@
 """
-Configurações do Transcritor de Aulas → NotebookLM PRO
+Configurações do Transcritor de Vídeos — Versão Rápida
 """
 import os
 
@@ -11,13 +11,21 @@ FFMPEG_BIN = os.environ.get("FFMPEG_BIN", "ffmpeg")
 FFPROBE_BIN = os.environ.get("FFPROBE_BIN", "ffprobe")
 
 # ── Modelo GGML ──────────────────────────────────────────
-# Para aulas longas (>1h), use ggml-small.bin (4x mais rápido)
-# Medium: melhor qualidade, mais lento | Small: bom equilíbrio | Base: mais rápido
-WHISPER_MODEL_PATH = os.environ.get("WHISPER_MODEL_PATH", os.path.join(BASE_DIR, "ggml-small.bin"))
+# Base: mais rápido (~10x que medium), qualidade suficiente p/ transcrição
+# Small: bom equilíbrio | Medium: melhor qualidade, mais lento
+WHISPER_MODEL_PATH = os.environ.get(
+    "WHISPER_MODEL_PATH",
+    os.path.join(BASE_DIR, "ggml-base.bin")
+)
 
-# Se não encontrar small, fallback para medium
+# Fallback: se não tiver base, tenta small, depois medium
 if not os.path.exists(WHISPER_MODEL_PATH):
-    WHISPER_MODEL_PATH = os.path.join(BASE_DIR, "ggml-medium.bin")
+    _small = os.path.join(BASE_DIR, "ggml-small.bin")
+    _medium = os.path.join(BASE_DIR, "ggml-medium.bin")
+    if os.path.exists(_small):
+        WHISPER_MODEL_PATH = _small
+    elif os.path.exists(_medium):
+        WHISPER_MODEL_PATH = _medium
 
 # ── Idioma padrão ────────────────────────────────────────
 DEFAULT_LANGUAGE = "pt"
@@ -32,17 +40,7 @@ DB_PATH = os.path.join(DATA_DIR, "db.sqlite3")
 MAX_UPLOAD_MB = 4096  # 4 GB
 ALLOWED_EXTENSIONS = {"mov", "mp4", "m4a", "mp3", "wav", "mkv", "webm"}
 
-# ── Pós-processamento ───────────────────────────────────
-DEFAULT_PARAGRAPH_GROUP_SIZE = 4       # legendas agrupadas por parágrafo
-DEFAULT_CHAPTER_WINDOW_SECONDS = 240   # janela de 4 min p/ detecção de tópicos
-DEFAULT_REELS_CUT_COUNT = 12           # cortes sugeridos para Reels
-
-# ── Whisper VAD (Voice Activity Detection) ───────────────
-# VAD ajuda a remover silêncios e melhorar timestamps em aulas longas
-# Recomendado: deixar ativado por padrão (checkbox na UI)
-
 # ── Whisper GPU/CPU ──────────────────────────────────────
-# Se houver crash com Metal/GPU no Apple Silicon, mude para False
 WHISPER_USE_GPU = os.environ.get("WHISPER_USE_GPU", "false").lower() == "true"
 
 # ── Flask ────────────────────────────────────────────────
